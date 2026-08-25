@@ -11,6 +11,72 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 
+def consultar_pedido(driver, numero_pedido):
+
+    #--------------------Página inicial---------------------
+    
+    # 2.1. Valida o login validando algum objeto que existe na página inicial
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//a[@title='Controle de Vendas']")))
+    
+    # 2.2. Acessa a página de consulta de pedidos
+    Pagina_inicial =  driver.find_element(By.XPATH, "//a[@title='Controle de Vendas']")
+    
+    # 2.3. Move o mouse para o elemento "Controle de Vendas" e clica na opção "Compras"
+    ActionChains(driver).move_to_element(Pagina_inicial).perform()
+    opcao_compras = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//a[@title='Compras']")))
+    opcao_compras.click()
+
+    #--------------------Página de Compra Consulta---------------------
+
+    # 3.1. Abre o filtro para consultar o numero do pedido
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_AjaxFiltro")))
+    filtro = driver.find_element(By.ID, "ctl00_Conteudo_imgabrefecha")
+    filtro.click()
+
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_AjaxFiltro")))
+    filtro = driver.find_element(By.ID, "ctl00_Conteudo_imgabrefecha")
+    filtro.click()
+
+    # 3.2. Preenche o campo de compra com o número do pedido
+    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "ctl00_Conteudo_btnFiltrar")))
+    campo_pedido = driver.find_element(By.ID, "ctl00_Conteudo_tbxIdCompra_txtId")
+    campo_pedido.send_keys(numero_pedido)
+
+    # 3.3. Clica no botão de pesquisar
+    botao_pesquisar = driver.find_element(By.ID, "ctl00_Conteudo_btnFiltrar")
+    botao_pesquisar.click()
+
+    # 3.4. Clica no link do pedido para abrir a tela de detalhes
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_rptCompra_ctl01_lnkCompraDetalhe")))
+    Click_pedido = driver.find_element(By.ID, "ctl00_Conteudo_rptCompra_ctl01_lnkCompraDetalhe")
+    Click_pedido.click()
+
+    #--------------------Validação de Elegibilidade---------------------
+    
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_Tabs_Panel1_lblParceiro")))
+    
+    # 4.1. Valida o parceiro
+    Parceiro = driver.find_element(By.ID, "ctl00_Conteudo_Tabs_Panel1_lblParceiro")
+    Parceiro_texto = Parceiro.text.strip()
+    
+    # 4.2. Valida a midia
+    Midia = driver.find_element(By.ID, "ctl00_Conteudo_Tabs_Panel1_lblMidia")
+    Midia_texto = Midia.text.strip()
+    
+    # 4.3. Valida a campanha
+    Campanha = driver.find_element(By.ID, "ctl00_Conteudo_Tabs_Panel1_lblCampanha")
+    Campanha_texto = Campanha.text.strip()
+    
+    if Parceiro_texto == "b2b_livelo" and Midia_texto == "livelo" and Campanha_texto == "livelo_acumulo":
+        resultado = "Elegível"
+        return resultado
+    
+    else:
+        resultado = "Não Elegível"
+        return resultado
+
+
+
 def main():
 
     # Inicia o Chrome
@@ -34,69 +100,15 @@ def main():
     Botão_login = driver.find_element(By.ID, "ctl00_Conteudo_ctrLogin_Login")
     Botão_login.click()
 
-    #--------------------Página inicial---------------------
+    #---------------------Pedidos em lista---------------------
 
-    # 2.1. Valida o login validando algum objeto que existe na página inicial
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//a[@title='Controle de Vendas']")))
+    #5.1. Lista de pedidos a serem consultados
+ 
+    pedidos = ["517167809", "518368241", "516718489"]
 
-    # 2.2. Acessa a página de consulta de pedidos
-    Pagina_inicial =  driver.find_element(By.XPATH, "//a[@title='Controle de Vendas']")
-
-    # 2.3. Move o mouse para o elemento "Controle de Vendas" e clica na opção "Compras"
-    ActionChains(driver).move_to_element(Pagina_inicial).perform()
-    opcao_compras = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//a[@title='Compras']")))
-    opcao_compras.click()
-
-    #--------------------Página de Compra Consulta---------------------
-
-    # 3.1. Abre o filtro para consultar o numero do pedido
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_AjaxFiltro")))
-    filtro = driver.find_element(By.ID, "ctl00_Conteudo_imgabrefecha")
-    filtro.click()
-
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_AjaxFiltro")))
-    filtro = driver.find_element(By.ID, "ctl00_Conteudo_imgabrefecha")
-    filtro.click()
-
-    # 3.2. Preenche o campo de compra com o número do pedido
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "ctl00_Conteudo_btnFiltrar")))
-    campo_pedido = driver.find_element(By.ID, "ctl00_Conteudo_tbxIdCompra_txtId")
-    campo_pedido.send_keys("520316880")
-
-    # 3.3. Clica no botão de pesquisar
-    botao_pesquisar = driver.find_element(By.ID, "ctl00_Conteudo_btnFiltrar")
-    botao_pesquisar.click()
-
-    # 3.4. Clica no link do pedido para abrir a tela de detalhes
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_rptCompra_ctl01_lnkCompraDetalhe")))
-    Click_pedido = driver.find_element(By.ID, "ctl00_Conteudo_rptCompra_ctl01_lnkCompraDetalhe")
-    Click_pedido.click()
-
-    #--------------------Validação de Elegibilidade---------------------
-
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "ctl00_Conteudo_Tabs_Panel1_lblParceiro")))
-
-    # 4.1. Valida o parceiro
-    Parceiro = driver.find_element(By.ID, "ctl00_Conteudo_Tabs_Panel1_lblParceiro")
-    Parceiro_texto = Parceiro.text.strip()
-
-    # 4.2. Valida a midia
-    Midia = driver.find_element(By.ID, "ctl00_Conteudo_Tabs_Panel1_lblMidia")
-    Midia_texto = Midia.text.strip()
-
-    # 4.3. Valida a campanha
-    Campanha = driver.find_element(By.ID, "ctl00_Conteudo_Tabs_Panel1_lblCampanha")
-    Campanha_texto = Campanha.text.strip()
-
-    if Parceiro_texto == "b2b_livelo" and Midia_texto == "livelo" and Campanha_texto == "livelo_acumulo":
-        fluxo_correto("Elegível")
-        print("\nElegível")
-
-    else:
-        fluxo_divergente("Não Elegível")
-        print("\nNão Elegível")
-   
-
+    for pedido in pedidos:
+        resultado = consultar_pedido(driver, pedido)
+        print(f"Pedido {pedido}: {resultado}")
 
     input("\nPressione ENTER para fechar o navegador...")
     driver.quit()
