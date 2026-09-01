@@ -1,5 +1,6 @@
 import time
 import subprocess
+import pandas as pd
 from unittest import result
 
 from selenium import webdriver
@@ -199,16 +200,14 @@ def main():
 
     #5.1. Lista de pedidos a serem consultados
  
-    pedidos = ["517167809", "517094115", "491129392"] 
+    pedidos = ["518383367","517969219","517766780","518583071"] 
 
     for pedido in pedidos:
         resultado = consultar_pedido_cb(driver, pedido)
-        print(f"\nPedido {pedido}: Casas Bahia")
-
+        
         if resultado is None:
             resultado = consultar_pedido_ponto(driver, pedido)
-            print(f"\nPedido {pedido}: Ponto Frio")
-
+            
             if resultado is None:
                 resultado = "Pedido não encontrado"
 
